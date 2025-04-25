@@ -1,13 +1,289 @@
-<html>
-  
-<center>
-  This is some html
-  <img src="https://c8.alamy.com/comp/DD75D0/green-grass-and-sea-with-pier-on-background-DD75D0.jpg" width=500>
-</center>
+<!DOCTYPE html>
+<html lang="en">
 
-<font size="+1">
-  This is +1 font size
-</font>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="This is the Climate Change Game 101.">
+  <meta name="author" content="">
 
-  
+  <title>Climate Change Game</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+  <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/chartjs/css/Chart.min.css" rel="stylesheet">
+  <link href="assets/vendor/as-alert-message/as-alert-message.min.css" rel="stylesheet">
+  <link href="assets/custom/css/site.css" rel="stylesheet">
+  <script async="" src="assets/vendor/chartjs_vivek_works/analytics.js"></script> 
+  <script src="assets/vendor/chartjs_vivek_works/moment.js"></script> 
+  <script src="assets/vendor/chartjs_vivek_works/Chart.js"></script> 
+  <script src="assets/vendor/chartjs_vivek_works/utils.js"></script> 
+  <script src="assets/vendor/as-alert-message/as-alert-message.min.js"></script> 
+
+
+  <style>
+  /* moving the following to assets/custom/css/site.css doesn't work */
+  #overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 2;
+    cursor: pointer;
+  }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <!--
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Climate Change Game 101</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+        aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  -->
+
+
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h3 class="mt-1">The Climate Change Game</h3>
+	<!--
+        <p class="lead">A one liner description.</p>
+	-->
+      </div>
+    </div>
+
+    <div class="row py-0">
+      <div class="col-lg-12">
+        <!-- Top Row -->
+        <div class="row my-0">
+
+          <!-- Top Row - Left Col -->
+          <div class="col-md-4 py-1 padding_custom">
+            <div class="card">
+              <div class="card-body border border-dark">
+                <h5 class="card-title">Global economy (Trillion $/yr)</h5>
+		<!--
+                <h6 class="card-subtitle mb-2 text-muted">Rate of change of xyz wrt CO<sub>2</sub></h6>
+		-->
+		<div id="chartA">
+                <canvas id="chart-A"></canvas>
+		</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Row - Middle Col -->
+          <div class="col-md-4 py-1 padding_custom">
+            <div class="card">
+              <div class="card-body border border-dark">
+		      <h5 class="card-title">Fossil fuel CO<sub>2</sub> emissions (Pg C/yr)</h5>
+		<!--
+                <h6 class="card-subtitle mb-2 text-muted">Rate of change of xyz wrt CO<sub>2</sub></h6>
+		 -->
+		<div id="chartB">
+                <canvas id="chart-B"></canvas>
+		</div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Row - Right Col -->
+          <div class="col-md-4 py-1 padding_custom">
+            <div class="card">
+              <div class="card-body border border-dark">
+		      <h5 class="card-title">Temperature change (<sup>o</sup>C) since 1850</h5>
+		<!--
+                <h6 class="card-subtitle mb-2 text-muted">Rate of change of xyz wrt CO<sub>2</sub></h6>
+		 -->
+		<div id="chartC">
+                <canvas id="chart-C"></canvas>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Bottom Row -->
+        <div class="row my-0">
+          <!-- Bottom Row - Left Col -->
+          <div class="col-md-4 py-1 d-flex padding_custom">
+            <div class="card flex-fill">
+              <div class="card-body border border-dark">
+                <h5 class="card-title">Growth rate of economy (%)</h5>
+		<!--
+                <h6 class="card-subtitle mb-2 text-muted">Rate of change of xyz wrt CO<sub>2</sub></h6>
+		-->
+		<div id="chartD">
+                  <canvas id="chart-D"></canvas>
+                </div>
+		<!--
+                <a href="#" class="card-link">Know more</a>
+		-->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row - Middle Col -->
+          <div class="col-md-4 py-1 d-flex padding_custom">
+            <div class="card flex-fill">
+              <div class="card-body border border-dark">
+		<!--
+                <p class="card-text">Questions will pop up here, and parameters will be changed here as well.</p>
+		-->
+                <form class="form-inline" name="Form1">
+
+		   <div id="start_year_div" class="d-block">
+                     <table class="table" style="font-size: 14px;">
+                       <tbody>
+                           <tr>
+                             <td>Choose a year between 1960-2080 in which you want your simulation to start. </td>
+                             <td> 
+                                 <select class="my_choice_select1 form-control" id="userInputParam1" onChange="progress_thru_game()">
+                                   <option selected value="1960">Choose a year</option>
+                                   <option value="1960">1960</option>
+                                   <option value="1970">1970</option>
+                                   <option value="1980">1980</option>
+                                   <option value="1990">1990</option>
+                                   <option value="2000">2000</option>
+                                   <option value="2010">2010</option>
+                                   <option value="2020">2020</option>
+                                   <option value="2030">2030</option>
+                                   <option value="2040">2040</option>
+                                   <option value="2050">2050</option>
+                                   <option value="2060">2060</option>
+                                   <option value="2070">2070</option>
+                                   <option value="2080">2080</option>
+                                 </select>
+			     </td>
+                           </tr>
+                       </tbody>
+                     </table>
+		   </div>
+
+		   <div style="font-size: 12px; text-align:center; width:100%;" id="pop_up_version"></div> 
+
+		   <div id="gdp_in_lce_div" class="d-none" style="font-size: 14px; width:100%;">
+                     <table class="table" style="font-size: 14px;">
+                       <tbody>
+                           <tr>
+                             <td>Choose percentage of the global economy to be invested in renewable energy 
+				  <div style="font-weight: bold; display:inline;" id="next_10_years"></div>
+				  <br><br>
+				  <select class="form-control mx-sm-3 my_choice_select1" id="userInputParam2" name="gdp_in_lce">
+                                   <option selected value="0.0001">Choose a percent rate</option>
+                                   <option value="0.0001">0.0%</option>
+                                   <option value="1">1.0%</option>
+                                   <option value="2">2.0%</option>
+                                   <option value="3">3.0%</option>
+                                   <option value="4">4.0%</option>
+                                   <option value="5">5.0%</option>
+                                   <option value="7.5">7.5%</option>
+                                   <option value="10">10.0%</option>
+                                   <option value="12.5">12.5%</option>
+                                   <option value="15">15.0%</option>
+                                   <option value="17.5">17.5%</option>
+                                   <option value="20">20.0%</option>
+                                   <option value="25">25.0%</option>
+                                   <option value="30">30.0%</option>
+                                   <option value="35">35.0%</option>
+                                   <option value="40">40.0%</option>
+                                   <option value="45">45.0%</option>
+                                   <option value="50">50.0%</option>
+                                 </select>
+			     </td>
+                           </tr>
+                       </tbody>
+                     </table>
+		   </div>
+
+                  <div class="container">
+                    <div class="col-md-12 text-center" style="margin-top: 10px;">
+	
+		      <div id="button1_enclosure" style="display:inline;">
+                         <div id="button1" type=button class="btn btn-primary" onclick="progress_thru_game()">Continue</div>
+		      </div>
+
+                      <div id="button2" type=button class="btn btn-primary" onClick="document.location.reload(true)">Start over</div>
+
+                    </div>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row - Right Col -->
+          <div class="col-md-4 py-1 d-flex padding_custom">            
+            <div class="card flex-fill">              
+              <div class="card-body border border-dark">
+		<h5 class="card-title"><div id="geog_temperature_delta">Geographical pattern of temperature change for your simulation</div></h5>
+		<div id="geog_2d_delta_t"></div>
+		<!--
+                <p class="card-text">Some quick example text to descibe the image.</p>
+                <a href="#" class="card-link">Know more</a>
+		-->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay" onclick="off()">
+  </div>
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <!-- Footer -->
+  <footer class="page-footer font-small blue">
+    <div class="text-center">&copy; 2020 Copyright The Climate Change Game</div>
+  </footer>
+  <!-- Footer -->
+
+
+  <script src="assets/vendor/jquery/jquery.slim.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+  <script src="assets/vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="assets/custom/js/site5_modified.js"></script>
+  <!--
+  <script src="assets/vendor/chartjs/js/Chart.min.js"></script>
+  -->
+
+
+</body>
+
 </html>
