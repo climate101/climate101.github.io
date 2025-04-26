@@ -1,0 +1,47 @@
+
+img{
+    padding: 1px;
+  }
+
+  .image1 {
+    padding: 1px;
+    border: 1px solid #000;
+}
+
+
+.userinputrow{
+    margin: 0;
+    padding-bottom: 5px;    
+}
+
+  .page-footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    height: 60px; /* Set the fixed height of the footer here */
+    line-height: 60px; /* Vertically center the text there */
+    background-color: #0e8386!important;
+    color: #ffffff;
+  }
+
+  .bg-dark {
+    background-color: #0e8386!important;
+}
+  
+
+.padding_custom{
+    padding-right:3px;
+    padding-left:3px;
+}
+  
+.my_choice_select1 {
+	background-color: #dfdfdf;
+	border-color: #888;
+}
+ 
+.my_choice_select2 {
+	background-color: #66ff00;
+	border-color: #888;
+}
+ 
+
