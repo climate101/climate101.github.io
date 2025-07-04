@@ -76,6 +76,11 @@
     text-align: center;
     margin-top: 17px;
     margin-bottom: 10px;
+
+    /* Adding following lines for scrollable content */
+    max-height: 400px;       /* Adjust height as needed */
+    overflow-y: auto;
+    text-align: left;        /* Optional: better for full-page HTML *
 }
 .as-alert-middle-center .as-alert-content {
     vertical-align: middle !important;

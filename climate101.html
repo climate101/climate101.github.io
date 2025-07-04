@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Economy–Climate Model</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 2em;
+      max-width: 800px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    code {
+      background-color: #f4f4f4;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+<a href="index.html">Go back to the climate change game</a>
+<hr>
+<h1>Global Economy–Climate Model</h1>
+
+<h2>1. Global Economic Output (Gross World Product, GWP)</h2>
+<p>The global economy consists of two sectors:</p>
+<ul>
+  <li><strong>HCE</strong>: High-Carbon Economy (emits CO₂)</li>
+  <li><strong>LCE</strong>: Low-Carbon Economy (emission-free)</li>
+</ul>
+<p>Total global output at time <code>t</code> is:</p>
+<pre><code>GWP(t) = GWP_HCE(t) + GWP_LCE(t)</code></pre>
+<p>Investment is split via:</p>
+<pre><code>u(t): % of investment into LCE (0–100)</code></pre>
+<p>Growth rates:</p>
+<ul>
+  <li><code>r_infra = 0.061</code>: Baseline HCE growth</li>
+  <li><code>r_decay(t) = 0.03 + 0.005 * max(T(t) - 1, 0)</code>: Reduces HCE growth when <code>T(t)</code> exceeds 1°C above pre-industrial</li>
+  <li><code>r_HCE(t) = r_infra - r_decay(t)</code>: Net growth rate of HCE</li>
+  <li><code>η</code>: Efficiency of LCE relative to HCE (e.g., 0.4)</li>
+</ul>
+<p>Sector outputs:</p>
+<pre><code>GWP_HCE(t) = GWP(t-1) * (1 - u(t)/100) * (1 + r_HCE(t))
+GWP_LCE(t) = GWP(t-1) * (u(t)/100) * (1 + η * r_HCE(t))</code></pre>
+<p><strong>Note:</strong> If <code>u(1) = 0</code>, then <code>GWP_LCE(1) = 0</code>. Since the initial investment in LCE is zero, it starts at zero and only grows if future <code>u(t) &gt; 0</code>. This implies that to kick-start LCE growth, some investment must occur.</p>
+
+<h2>2. Emissions</h2>
+<p>Only the HCE emits carbon:</p>
+<pre><code>CO2(t) = α * GWP_HCE(t)^β</code></pre>
+<ul>
+  <li><code>α = 0.54</code>, <code>β = 0.66</code></li>
+</ul>
+<p>Cumulative emissions:</p>
+<pre><code>E_cum(t) = E_cum(t-1) + CO2(t)</code></pre>
+<p>Initial value: 81 Pg C of cumulative emissions until 1960</p>
+<pre><code>E_cum(1) = 81 + CO2(1)</code></pre>
+
+<h2>3. Temperature</h2>
+<p>Assuming linear response via TCRE:</p>
+<pre><code>T(t) = E_cum(t) / 500</code></pre>
+
+<h2>4. Economic Growth Rate</h2>
+<p>Total growth rate at time <code>t</code>:</p>
+<pre><code>r(t) = GWP(t)/GWP(t-1) - 1</code></pre>
+
+<h2>5. Initial Values</h2>
+<ul>
+  <li><code>GWP(1) = 11.5</code> (trillion $/year)</li>
+  <li><code>E_cum(1) = 81 + CO2(1)</code> (PgC)</li>
+  <li><code>T(1) = E_cum(1) / 500</code> (°C)</li>
+  <li><code>u(1) = 0</code> (% invested in LCE)</li>
+  <li><code>η</code> user-defined (e.g., 0.4)</li>
+</ul>
+
+<h2>6. Feedback Loop</h2>
+<p>
+  Economic activity from the HCE increases CO₂ emissions, which drive temperature rise.
+  Warming increases economic decay, reducing growth of the HCE. Investment in LCE can reduce emissions and preserve long-term output, but comes at a cost of reduced GWP for the present day.
+  However, LCE growth only begins when <code>u(t)</code> becomes positive. If <code>u(1) = 0</code>, then <code>GWP_LCE(1)</code> remains zero until investment shifts.
+</p>
+
+<hr>
+<a href="index.html">Go back to the climate change game</a>
+<hr>
+</body>
+</html>
