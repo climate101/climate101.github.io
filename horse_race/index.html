@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horse Race</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding-top: 20px;
+
+            background-image: url('images/horse_race_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* This makes the background stay in place when you scroll */
+            color: #333; /* A nice off-black for text */
+        }
+
+	/* Optional: Add a subtle overlay to make the text more readable */
+        .container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white overlay */
+            z-index: -1; /* Place it behind the content */
+        }
+        
+        /* Make sure your main content container is styled to show on top of the background */
+        .container {
+            background-color: rgba(255, 255, 255, 0.8); /* Optional: A semi-transparent white for the container itself */
+            border-radius: 15px; /* Adds a nice rounded border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* A soft shadow for depth */
+        }
+
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 0px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #333;
+        }
+
+        /* General tab button style */
+        .tab-button {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-bottom: 3px solid transparent; /* Prepare for the active state */
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: background-color 0.3s, color 0.3s, border-bottom 0.3s;
+            font-size: 1.8em;
+            color: #000;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        /* Style for the active tab */
+        .tab-button.active {
+            background-color: #007bff; /* NEW: Blue background to match buttons */
+            color: #fff; /* NEW: White font color */
+            border-color: #ccc;
+            border-bottom-color: transparent; /* Remove the bottom border to make it look connected */
+        }
+        
+        /* Hover effect for all tabs */
+        .tab-button:hover {
+            background-color: #ddd;
+        }	
+
+        /* All tab contents are initially hidden by default */
+        .tab-content {
+            width: 100%;
+            max-width: 99%;
+            padding: 20px;
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .num-horses-input {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .num-horses-input input {
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .buttons button {
+            padding: 12px 24px;
+            font-size: 22px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        #playButton {
+            background-color: #4CAF50;
+        }
+
+        #playButton:disabled {
+            background-color: #8bc34a;
+            cursor: not-allowed;
+        }
+
+        #resetButton {
+            background-color: #f44336;
+        }
+
+        #pauseButton {
+            background-color: #ff9800;
+        }
+        
+        #toggleMusicButton {
+            background-color: #555;
+        }
+        
+        #toggleMusicButton:hover {
+            background-color: #333;
+        }
+
+        .race-track {
+            width: 100%;
+            border: 5px solid #4CAF50;
+            background-color: transparent; /* Make it transparent */
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background-color 0.5s ease-in; /* New transition for the color */
+        }
+        
+        .race-track.visible {
+            background-color: #97a997; /* The original green color */
+        }
+
+	.lane {
+            display: flex;
+            align-items: center;
+            height: 80px;
+            margin-bottom: 10px;
+            border-bottom: 2px dashed #e0e0e0;
+            position: relative;
+            padding-left: 0px; /* MODIFIED: Start at the edge */
+            transition: background-color 0.5s ease;
+        
+            /* New styles for the slide-in animation */
+            transform: translateX(100%);
+            transition: transform 0.2s ease-out; /* The animation duration and style */
+        }
+
+	.lane.animate-in {
+            transform: translateX(0);
+        }
+
+        .lane:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .lane:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .lane.leader {
+            background-color: #ffffcc;
+        }
+        
+        .lane-number {
+            position: absolute;
+            right: 20px; /* Start on the right side */
+            font-size: 36px; /* MODIFIED: Increased font size */
+            font-weight: bold;
+            color: #050;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+            transition: color 0.5s ease, right 0.8s ease, left 0.8s ease;
+        }
+        
+        /* Moves the name to the left side */
+        .lane-number.at-left {
+            right: auto;
+            left: 20px;
+        }
+        
+        .lane.leader .lane-number {
+            color: #000;
+            text-shadow: none;
+        }
+
+        .lane:last-child {
+            border-bottom: none;
+        }
+
+        .horse {
+            width: 70px;
+            height: 70px;
+            position: absolute;
+            left: 0px; /* MODIFIED: Placed to the extreme left */
+            transition: transform 0.1s linear;
+        }
+
+        .horse-image {
+            width: 100%;
+            height: 100%;
+        }
+
+        .winner-display, .leader-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            transition: all 0.5s ease-in-out;
+        }
+        
+        /* New styling for the fancy message */
+        .fancy-message {
+            background-color: #2196F3;
+            color: white;
+            font-weight: bold;
+            font-size: 28px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Betting UI Styles */
+        .betting-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #addPlayerButton {
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            background-color: #607D8B;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        #playerNameInput {
+            font-size: 22px;
+            padding: 10px;
+        }
+
+        #playerNameInput::placeholder {
+            font-weight: bold;
+        }
+
+        .betting-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .betting-actions button {
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        #placeBetsButton {
+            background-color: #2196F3;
+        }
+
+        #resetBetsButton {
+            background-color: #f44336;
+        }
+
+        #betting-grid {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .grid-header, .grid-row {
+            display: contents;
+        }
+        
+        /* Updated padding to make the cells more compact and fit more player names */
+        .grid-cell, .grid-header-cell {
+            padding: 1px;  
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            font-size: 21px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .grid-cell.player-cell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .grid-cell.summary-cell {
+            background-color: #e3f2fd;
+            font-size: 20px;
+        }
+        
+        .grid-header-cell:first-child {
+            text-align: left;
+        }
+
+        .bet-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .unit-input {
+            width: 80px;
+            height: 35px;
+            font-size: 18px;
+            padding: 5px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            text-align: center;
+            color: #006400;
+        }
+
+        .unit-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+
+        .results-section {
+            margin-top: 30px;
+            border-top: 2px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .results-section h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .bet-summary {
+            margin-top: 20px;
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .payout-item {
+            background-color: #d4edda;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+            font-weight: bold;
+        }
+
+        .delete-player-button {
+            background: none;
+            border: none;
+            color: #f44336;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .delete-player-button:hover {
+            transform: scale(1.2);
+        }
+        
+        .winnings-text {
+            color: #006400;
+            font-weight: bold;
+            font-size: 21px;
+        }
+
+        /* New CSS for the "You Lost" message */
+        .lost-text {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 21px;
+        }
+        
+        .fractional-units-text {
+            color: grey;
+            font-weight: normal;
+        }
+        
+        /* New styling for the winning column - now a darker green */
+        .winning-horse-column {
+            background-color: #c8e6c9; /* Darker green background */
+            border-right: 2px solid #4CAF50;
+            border-left: 2px solid #4CAF50;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Simulator Tab Styles */
+        #simulatorTabContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .simulation-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .simulation-controls input {
+            font-size: 18px;
+            padding: 8px;
+            width: 150px;
+        }
+        
+        .simulation-controls button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #simulatorResults {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #histogram {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            border-bottom: 2px solid #333;
+            height: 300px;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #fff;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .histogram-bar {
+            flex-grow: 1;
+            background-color: #4CAF50;
+            position: relative;
+            transition: height 0.5s ease-in-out;
+            min-width: 30px;
+        }
+        
+        .histogram-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .histogram-horse-number {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Make the controls container a flexbox to align elements horizontally */
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        /* Make the buttons container a flexbox to align buttons and the timer */
+        .buttons {
+            display: flex;
+            gap: 10px; /* Adds space between buttons */
+            align-items: center;
+        }
+        
+        .buttons button {
+            padding: 12px 18px; /* Increased padding */
+            border-radius: 5px;
+            border: 1px solid #0056b3;
+            background-color: #007bff;
+            color: #ffffff;
+            font-size: 1.5em; /* Increased font size */
+            cursor: pointer;
+        }
+        
+        /* Update the timer style to match the new button size */
+        #timerDisplay {
+            padding: 12px 18px; /* Increased padding */
+            border-radius: 5px;
+            border: 1px solid #0056b3;
+            background-color: #007bff;
+            color: #ffffff;
+            font-size: 1.5em; /* Increased font size */
+            font-weight: bold;
+            text-align: center;
+            cursor: default;
+        }
+
+
+	.repeated-horse-cell {
+            font-size: 12px;
+            color: #777;
+            font-weight: normal;
+        }
+
+        .session-balance-badge {
+            background-color: #eee;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 21px;
+            margin-left: 5px;
+            border: 1px solid #ccc;
+        }
+        .balance-pos { color: #006400; font-weight: bold; }
+        .balance-neg { color: #f44336; font-weight: bold; }
+
+
+    </style>
+</head>
+<body class="container">
+
+    <h1>Horse Race</h1>
+
+    <div class="tab-container">
+        <button class="tab-button" data-tab="play">Play</button>
+        <button class="tab-button" data-tab="betting">Betting</button>
+        <button class="tab-button" data-tab="simulator">Simulate</button>
+    </div>
+
+    <div id="playTabContent" class="tab-content">
+        <div class="controls-container">
+            <div class="num-horses-input">
+                <label for="numHorses">Number of Horses (4-10):</label>
+                <input type="number" id="numHorses" value="5" min="4" max="10">
+            </div>
+            
+            <div class="buttons">
+                <button id="playButton">Start Race</button>
+                <button id="pauseButton">Pause</button>
+                <button id="resetButton">Reset</button>
+                <button id="toggleMusicButton">Turn Music Off</button>
+                <div id="timerDisplay">0s</div>
+            </div>
+        </div>
+    
+        <div class="race-track animated-track">
+        </div>
+    
+        <div class="leader-display" id="leaderDisplay"></div>
+        <div class="winner-display" id="winnerDisplay"></div>
+        <div class="message-box" id="messageBox"></div>
+    </div>
+
+
+    <div id="bettingTabContent" class="tab-content" style="display: none;">
+        <h2>Set Up Bets</h2>
+        <div class="betting-controls">
+            <input type="text" id="playerNameInput" placeholder="Enter Player Name">
+            <button id="addPlayerButton">Add Player</button>
+        </div>
+
+        <div id="betting-grid-container">
+            </div>
+
+        <div class="betting-actions">
+            <button id="placeBetsButton">Head to play tab</button>
+            <button id="resetBetsButton">Reset Bets (Doesn't reset players' names)</button>
+        </div>
+
+        <div class="results-section" id="bettingResults">
+            <h3>Race Results</h3>
+            </div>
+    </div>
+
+    <div id="simulatorTabContent" class="tab-content" style="display: none;">
+        <h2>Test Randomness with Simulations</h2>
+        <p>Run many races instantly to see the distribution of wins. A truly random race will show a roughly even distribution across all horses.</p>
+        <div class="simulation-controls">
+            <label for="numSimulations">Number of Races:</label>
+            <input type="number" id="numSimulations" value="1000" min="100" max="100000">
+            <button id="runSimulationsButton">Run Simulations</button>
+        </div>
+
+        <div id="simulatorResults">
+            <div id="histogram">
+                </div>
+        </div>
+    </div>
+
+<script>
+    // --- VARIABLES TO CONFIGURE ---
+    const HORSE_IMAGE_URL = 'images/horse_racing_2.png';
+    const HORSE_FALLBACK_URL = 'https://www.nicepng.com/png/full/127-1273340_race-horse-side-view-horse-and-jockey-clipart.png';
+
+    const MIN_SPEED = 1;
+    const MAX_SPEED = 50;
+    const MOVE_CHANCE = 0.20;
+    const AUDIO_FILES = [
+	'audio/80s-retro-synth.mp3',
+	'audio/outrun-neon-dreams-80s.mp3',
+        //'audio/coulisses.mp3',
+	'audio/pounding-industrial-techno.mp3'
+	//'audio/louvre.mp3',
+        //'audio/place_vendome.mp3'
+    ];
+    
+    // --- HARD-CODED PLAYERS ---
+    const INITIAL_PLAYERS = [
+     'Nainesh',
+     'Sayukta',
+     'Niti',
+     'Sejal',
+     'Iti',
+     'Deepak',
+     'Himanshu',
+     'Devika',
+     'Kunal',
+     'Priyanka',
+     'Rajeev',
+     'Manika',
+     'Sameer',
+     'Ishan',
+     'Sumeet',
+     'Himani',
+     'Rohan',
+    ];
+
+    // --- SESSION BALANCES ---
+    let playerBalances = {};
+    INITIAL_PLAYERS.forEach(name => playerBalances[name] = 0);
+
+    // --- NEW: INDIAN HORSE NAMES POOL ---
+
+    const INDIAN_HORSE_NAMES = [
+        "Biryani Bolt", "Chai Charger", "Curry Cruiser", "Dosa Dingo",
+        "Samosa Speedster", "Tikka Turbo", "Paneer Pacer",
+        "Lassi Lightning", "Tandoori Tornado", 
+        "Jalebi Jet", "Pakora Piston", "Mumbai Meteor",
+        "Delhi Dasher", "Bangalore Bullet", "Chennai Charger", "Kolkata Kicker",
+        "Punjab Powerhouse", "Bollywood Blaze", 
+        "Maharaja Mayhem", 
+        "Karma Kicker", "Dhoti Dasher", "Masala Missile",
+        "Spice Sprinter", "Curry Cannon", "Vindaloo Velocity",
+        "Raita Rocket", "Chutney Chaser"
+    ];
+    let activeHorseNames = []; // PERSISTENT SESSION NAMES
+    
+    // ------------------------------
+    
+    // Tab switching function
+    function openTab(tabName) {
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabContents.forEach(tab => {
+            tab.style.display = 'none';
+        });
+        
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById(tabName + 'TabContent').style.display = 'block';
+        document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add('active');
+        
+        if (tabName === 'betting') {
+            renderBettingGrid();
+        }
+    }
+    
+    // --- GAME LOGIC ---
+    const numHorsesInput = document.getElementById('numHorses');
+    const track = document.querySelector('.race-track');
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const resetButton = document.getElementById('resetButton');
+    const toggleMusicButton = document.getElementById('toggleMusicButton');
+    const winnerDisplay = document.getElementById('winnerDisplay');
+    const leaderDisplay = document.getElementById('leaderDisplay');
+    const messageBox = document.getElementById('messageBox');
+
+    // New timer variables
+    const timerDisplay = document.getElementById('timerDisplay');
+    let timerInterval = null;
+    let raceStartTime = 0;
+    let pausedTime = 0; 
+    
+    let horseElements = [];
+    let raceInterval = null;
+    let isRaceFinished = false;
+    let allBets = [];
+    let players = [...INITIAL_PLAYERS];
+    let lastRaceResults = null;
+    let raceAudio = null;
+    let isMusicOn = true;
+
+    // References to betting UI elements
+    const playerNameInput = document.getElementById('playerNameInput');
+    const addPlayerButton = document.getElementById('addPlayerButton');
+    const bettingGridContainer = document.getElementById('betting-grid-container');
+    const bettingResultsDiv = document.getElementById('bettingResults');
+    const placeBetsButton = document.getElementById('placeBetsButton');
+    const resetBetsButton = document.getElementById('resetBetsButton');
+    
+    // References to simulator UI elements
+    const numSimulationsInput = document.getElementById('numSimulations');
+    const runSimulationsButton = document.getElementById('runSimulationsButton');
+    const simulatorResultsDiv = document.getElementById('simulatorResults');
+    const histogramContainer = document.getElementById('histogram');
+    
+    toggleMusicButton.textContent = "Turn Music Off";
+
+    function showMessage(message, isFancy = false) {
+        messageBox.textContent = message;
+        messageBox.style.display = 'block';
+
+        if (isFancy) {
+            messageBox.classList.add('fancy-message');
+        } else {
+            messageBox.classList.remove('fancy-message');
+        }
+
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+            messageBox.classList.remove('fancy-message');
+        }, 3000);
+    }
+    
+    function setupHorses() {
+        const numHorses = parseInt(numHorsesInput.value, 10);
+
+        // PERSISTENCE LOGIC: Refresh names only if horse count changed
+        if (activeHorseNames.length !== numHorses) {
+            const shuffled = [...INDIAN_HORSE_NAMES].sort(() => 0.5 - Math.random());
+            activeHorseNames = shuffled.slice(0, numHorses);
+        }
+
+        track.innerHTML = '';
+        horseElements = [];
+    
+        if (isNaN(numHorses) || numHorses < 4 || numHorses > 10) {
+            showMessage("Please enter a number between 4 and 10.");
+            numHorsesInput.value = 6;
+            return;
+        }
+    
+        if (raceAudio) {
+            raceAudio.pause();
+            raceAudio.currentTime = 0;
+            raceAudio = null;
+        }
+    
+        if (isMusicOn) {
+            const randomTrack = AUDIO_FILES[Math.floor(Math.random() * AUDIO_FILES.length)];
+            raceAudio = new Audio(randomTrack);
+            raceAudio.loop = true;
+        }
+        
+        // Animate each lane individually
+        for (let i = 0; i < numHorses; i++) {
+            const lane = document.createElement('div');
+            lane.classList.add('lane');
+            
+            const laneNumber = document.createElement('span');
+            laneNumber.classList.add('lane-number');
+            // UPDATED: Show name instead of just number
+            laneNumber.textContent = activeHorseNames[i];
+    
+            const horse = document.createElement('div');
+            horse.classList.add('horse');
+            horse.innerHTML = `<img src="${HORSE_IMAGE_URL}" alt="${activeHorseNames[i]}" class="horse-image" onerror="this.onerror=null;this.src='${HORSE_FALLBACK_URL}';">`;
+            horse.style.transform = `translateX(0px)`;
+            horse.dataset.lane = i + 1;
+            horse.dataset.position = 0;
+            
+            lane.appendChild(laneNumber);
+            lane.appendChild(horse);
+            track.appendChild(lane);
+            horseElements.push(horse);
+            
+            // This is the logic for the staggered animation
+            setTimeout(() => {
+              lane.classList.add('animate-in');
+            }, i * 50);
+        }
+        
+        // New logic to fade in the background after the lanes have finished animating
+        const totalLaneAnimationTime = (numHorses - 1) * 50; 
+        const backgroundDelay = totalLaneAnimationTime + 300; 
+    
+        setTimeout(() => {
+            track.classList.add('visible');
+        }, backgroundDelay);
+        
+        track.classList.remove('visible');
+    
+        winnerDisplay.textContent = '';
+        leaderDisplay.textContent = '';
+        isRaceFinished = false;
+        pauseButton.textContent = 'Pause';
+        
+        bettingResultsDiv.innerHTML = '<h3>Race Results</h3>';
+    }    
+    
+    function adjustNumHorsesWithScroll(e) {
+        e.preventDefault();
+        let currentValue = parseInt(e.currentTarget.value) || 0;
+        const min = parseInt(e.currentTarget.min, 10);
+        const max = parseInt(e.currentTarget.max, 10);
+        if (e.deltaY < 0) {
+            currentValue = Math.min(max, currentValue + 1);
+        } else {
+            currentValue = Math.max(min, currentValue - 1);
+        }
+        e.currentTarget.value = currentValue;
+        setupHorses();
+    }
+    
+    numHorsesInput.addEventListener('wheel', adjustNumHorsesWithScroll);
+
+    function updateLeader() {
+        let maxPos = -1;
+        let leaderLane = 0;
+        let leaderElement = null;
+
+        document.querySelectorAll('.lane').forEach(lane => {
+            lane.classList.remove('leader');
+        });
+
+        for (const horse of horseElements) {
+            const currentPos = parseInt(horse.dataset.position);
+            if (currentPos > maxPos) {
+                maxPos = currentPos;
+                leaderLane = horse.dataset.lane;
+                leaderElement = horse.parentElement;
+            }
+        }
+        
+        if (leaderElement) {
+            leaderElement.classList.add('leader');
+        }
+
+        // UPDATED: Use Horse Name
+        leaderDisplay.textContent = `Leader: ${activeHorseNames[leaderLane-1]}`;
+    }
+
+    function moveHorses() {
+        const horseWidth = 70;
+        const finishLine = track.offsetWidth - horseWidth;
+        const midPoint = finishLine / 2;
+        
+        if (isRaceFinished) {
+            clearInterval(raceInterval);
+            raceInterval = null;
+            return;
+        }
+    
+        const shuffledHorses = [...horseElements].sort(() => Math.random() - 0.5);
+    
+        for (const horse of shuffledHorses) {
+            const currentPos = parseInt(horse.dataset.position);
+            
+            if (Math.random() < MOVE_CHANCE) {
+                const speedVariation = Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+                const newPos = currentPos + speedVariation;
+                
+                horse.dataset.position = newPos;
+                horse.style.transform = `translateX(${newPos}px)`;
+
+                // If any horse crosses the midpoint, move all names to the left
+                if (newPos >= midPoint) {
+                    document.querySelectorAll('.lane-number').forEach(name => {
+                        name.classList.add('at-left');
+                    });
+                }
+    
+                if (newPos >= finishLine) {
+                    isRaceFinished = true;
+                    clearInterval(raceInterval);
+                    raceInterval = null;
+                    const winnerLane = parseInt(horse.dataset.lane);
+                    // UPDATED: Show name
+                    winnerDisplay.textContent = `${activeHorseNames[winnerLane-1]} wins!`;
+                    playButton.disabled = false;
+                    
+                    clearInterval(timerInterval);
+                    const raceTime = (pausedTime + (Date.now() - raceStartTime)) / 1000;
+                    timerDisplay.textContent = `${raceTime.toFixed(2)}s`;
+                    
+                    if (isMusicOn) {
+                        stopAudioWithFade(raceAudio);
+                    }
+    
+                    lastRaceResults = calculatePayouts(winnerLane);
+                    updateSessionBalances(lastRaceResults);
+                    updateBettingResultsDisplay();
+                    
+                    if (allBets.length > 0) {
+                        showMessage("Race is over! Switching to \"Betting\" tab for players' payout.", true);
+                        setTimeout(() => {
+                            openTab('betting');
+                        }, 3000);
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        updateLeader();
+    }
+
+    
+    function stopAudioWithFade(audioElement) {
+        if (!audioElement) return;
+
+        const fadeOutInterval = 50;
+        const fadeOutDuration = 2000;
+        const steps = fadeOutDuration / fadeOutInterval;
+        const volumeReductionPerStep = audioElement.volume / steps;
+
+        const fadeInterval = setInterval(() => {
+            if (audioElement.volume > volumeReductionPerStep) {
+                audioElement.volume -= volumeReductionPerStep;
+            } else {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                audioElement.volume = 1.0;
+                clearInterval(fadeInterval);
+            }
+        }, fadeOutInterval);
+    }
+
+    playButton.addEventListener('click', () => {
+        pausedTime = 0; 
+    
+        if (raceInterval === null && !isRaceFinished) {
+            setupHorses();
+            const numHorses = parseInt(numHorsesInput.value, 10);
+            const totalLaneAnimationTime = (numHorses - 1) * 50;
+            const animationDelay = totalLaneAnimationTime + 300;
+            
+            setTimeout(() => {
+                if (isMusicOn) {
+                    raceAudio.play().catch(e => console.error("Audio playback failed:", e));
+                }
+                raceInterval = setInterval(moveHorses, 100);
+                playButton.disabled = true;
+                
+                raceStartTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const elapsedSeconds = ((Date.now() - raceStartTime) / 1000).toFixed(2);
+                    timerDisplay.textContent = `${elapsedSeconds}s`;
+                }, 10);
+            }, animationDelay + 250);
+        }
+        else if (raceInterval === null && isRaceFinished) {
+            setupHorses();
+            const numHorses = parseInt(numHorsesInput.value, 10);
+            const totalLaneAnimationTime = (numHorses - 1) * 50;
+            const animationDelay = totalLaneAnimationTime + 300;
+            
+            setTimeout(() => {
+                if (isMusicOn) {
+                    raceAudio.play().catch(e => console.error("Audio playback failed:", e));
+                }
+                raceInterval = setInterval(moveHorses, 100);
+                playButton.disabled = true;
+                
+                raceStartTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const elapsedSeconds = ((Date.now() - raceStartTime) / 1000).toFixed(2);
+                    timerDisplay.textContent = `${elapsedSeconds}s`;
+                }, 10);
+            }, animationDelay + 250);
+        }
+    });
+
+    pauseButton.addEventListener('click', () => {
+        if (raceInterval !== null) {
+            clearInterval(raceInterval);
+            raceInterval = null;
+            playButton.disabled = false;
+            pauseButton.textContent = 'Resume';
+            if (raceAudio && isMusicOn) {
+                raceAudio.pause();
+            }
+            clearInterval(timerInterval);
+            pausedTime += Date.now() - raceStartTime;
+        } else if (!isRaceFinished) {
+            raceInterval = setInterval(moveHorses, 100);
+            playButton.disabled = true;
+            pauseButton.textContent = 'Pause';
+            if (raceAudio && isMusicOn) {
+                raceAudio.play().catch(e => console.error("Audio playback failed:", e));
+            }
+            raceStartTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsedSeconds = (pausedTime + (Date.now() - raceStartTime)) / 1000;
+                timerDisplay.textContent = `${elapsedSeconds.toFixed(2)}s`;
+            }, 10);
+        }
+    });
+
+    resetButton.addEventListener('click', () => {
+        clearInterval(raceInterval);
+        raceInterval = null;
+        playButton.disabled = false;
+        setupHorses();
+        players = [...INITIAL_PLAYERS];
+        allBets = [];
+        lastRaceResults = null;
+        renderBettingGrid();
+        if (raceAudio && isMusicOn) {
+            stopAudioWithFade(raceAudio);
+        }
+        clearInterval(timerInterval);
+        timerDisplay.textContent = '0s';
+    
+        pausedTime = 0;
+    });
+
+    
+    toggleMusicButton.addEventListener('click', () => {
+        isMusicOn = !isMusicOn;
+        if (isMusicOn) {
+            toggleMusicButton.textContent = "Turn Music Off";
+        } else {
+            toggleMusicButton.textContent = "Turn Music On";
+            if (raceAudio) {
+                raceAudio.pause();
+            }
+        }
+    });
+
+    // --- BETTING LOGIC ---
+    addPlayerButton.addEventListener('click', () => {
+        const name = playerNameInput.value.trim();
+        if (name === "") {
+            showMessage("Please enter a player name.");
+            return;
+        }
+        if (players.includes(name)) {
+            showMessage("That name is already in use. Please choose a different name.");
+            return;
+        }
+        players.push(name);
+        playerBalances[name] = 0; // Initialize balance for new player
+        playerNameInput.value = '';
+        renderBettingGrid();
+    });
+    
+    function attachDeleteListeners() {
+        const deleteButtons = bettingGridContainer.querySelectorAll('.delete-player-button');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', handleDeletePlayer);
+        });
+    }
+
+    resetBetsButton.addEventListener('click', () => {
+        allBets = [];
+        lastRaceResults = null;
+        renderBettingGrid();
+        bettingResultsDiv.innerHTML = '<h3>Race Results</h3>';
+        showMessage("All bets have been reset. Players remain.");
+    });
+
+    function renderBettingGrid() {
+        const numHorses = parseInt(numHorsesInput.value, 10);
+        const gridHTML = document.createElement('div');
+        gridHTML.id = 'betting-grid';
+        
+        gridHTML.style.gridTemplateColumns = `auto 1fr auto repeat(${numHorses}, auto)`;
+        
+        const winnerLane = lastRaceResults?.winnerLane;
+        const winningPlayers = lastRaceResults?.winnerData?.map(p => p.name) || [];
+
+        let gridContent = '<div class="grid-header">';
+        gridContent += '<div class="grid-header-cell"></div>'; // Empty cell for X column
+        gridContent += '<div class="grid-header-cell">P L A Y E R</div>';
+        gridContent += '<div class="grid-header-cell">P O I N T S</div>';
+        for (let i = 1; i <= numHorses; i++) {
+            const headerClass = (winnerLane && i === winnerLane) ? 'winning-horse-column' : '';
+            // UPDATED: Use horse name
+            gridContent += `<div class="grid-header-cell ${headerClass}">${activeHorseNames[i-1]}</div>`;
+        }
+        gridContent += '</div>';
+
+        players.forEach((player, index) => {
+            let statusText = '';
+            if (lastRaceResults) {
+                const hasBet = allBets.some(bet => bet.name === player);
+                const isWinner = winningPlayers.includes(player);
+                
+                if (isWinner) {
+                    const winningPlayer = lastRaceResults.winnerData.find(payout => payout.name === player);
+                    statusText = `<span class="winnings-text"> (${winningPlayer.roundedPayout} <span class="fractional-units-text">[${winningPlayer.rawPayout.toFixed(2)}]</span> units won)</span>`;
+                } else if (hasBet) {
+                    statusText = `<span class="lost-text"> (You Lost)</span>`;
+                }
+            }
+            
+            // Format balance string
+            const bal = playerBalances[player] || 0;
+            const balClass = bal >= 0 ? 'balance-pos' : 'balance-neg';
+            const balSign = bal > 0 ? '+' : '';
+            const balanceDisplay = `<span class="session-balance-badge ${balClass}">Points: ${balSign}${bal}</span>`;
+
+            if (index > 0) {		
+               gridContent += `<div class="grid-row">`;
+               gridContent += `<div class="grid-cell"></div>`; // Empty for X column
+               gridContent += `<div class="grid-cell"></div>`; // Empty for player name column
+               gridContent += `<div class="grid-cell"></div>`; // Empty for points column
+               for (let i = 1; i <= numHorses; i++) {
+                   const cellClass = (winnerLane && i === winnerLane) ? 'winning-horse-column' : '';
+                   // UPDATED: Use horse name
+                   gridContent += `<div class="grid-cell repeated-horse-cell ${cellClass}">${activeHorseNames[i-1]}</div>`;
+               }
+               gridContent += `</div>`;
+	    }
+
+
+	    gridContent += `<div class="grid-row">`;
+            gridContent += `<div class="grid-cell"><button class="delete-player-button" data-player="${player}">X</button></div>`;
+            gridContent += `<div class="grid-cell player-cell" data-player="${player}">${player}${statusText}</div>`;
+            gridContent += `<div class="grid-cell">${balanceDisplay}</div>`;
+            for (let i = 1; i <= numHorses; i++) {
+                const existingBet = allBets.find(bet => bet.name === player && bet.horse === i);
+                const betValue = existingBet ? existingBet.amount : 0;
+                const cellClass = (winnerLane && i === winnerLane) ? 'winning-horse-column' : '';
+
+                gridContent += `<div class="grid-cell bet-input-group ${cellClass}">
+                    <input type="number" class="unit-input" data-player="${player}" data-horse="${i}" placeholder="Units" min="0" value="${betValue}">
+                </div>`;
+            }
+            gridContent += `</div>`;
+        });
+
+        const totalBets = {};
+        let totalPool = 0;
+        for(let i = 1; i <= numHorses; i++) {
+            const horseTotal = allBets.filter(bet => bet.horse === i).reduce((sum, bet) => sum + bet.amount, 0);
+            totalBets[i] = horseTotal;
+            totalPool += horseTotal;
+        }
+
+	gridContent += `<div class="grid-row">`;
+        gridContent += `<div class="grid-cell summary-cell"></div>`; // Empty for X column
+        gridContent += `<div class="grid-cell summary-cell">Total bet per horse</div>`;
+        gridContent += `<div class="grid-cell summary-cell"></div>`; // Empty for points column
+        for (let i = 1; i <= numHorses; i++) {
+            const summaryCellClass = (winnerLane && i === winnerLane) ? 'winning-horse-column' : '';
+            gridContent += `<div class="grid-cell summary-cell ${summaryCellClass}">${totalBets[i] || 0}</div>`;
+        }
+        gridContent += '</div>';
+
+        gridContent += `<div class="grid-row">`;
+        gridContent += `<div class="grid-cell summary-cell"></div>`; // Empty for X column
+        gridContent += `<div class="grid-cell summary-cell">Total bettings</div>`;
+        gridContent += `<div class="grid-cell summary-cell"></div>`; // Empty for points column
+        gridContent += `<div class="grid-cell summary-cell" style="grid-column: 4 / span ${numHorses};">${totalPool}</div>`;
+        gridContent += '</div>';
+
+        gridHTML.innerHTML = gridContent;
+        bettingGridContainer.innerHTML = '';
+        bettingGridContainer.appendChild(gridHTML);
+        
+        const unitInputs = bettingGridContainer.querySelectorAll('.unit-input');
+        unitInputs.forEach(input => {
+            input.addEventListener('input', updateBettingState);
+            input.addEventListener('wheel', adjustBetWithScroll);
+        });
+        
+        attachDeleteListeners();
+    }
+    
+    function handleDeletePlayer(event) {
+        const playerToDelete = event.currentTarget.dataset.player;
+        players = players.filter(player => player !== playerToDelete);
+        allBets = allBets.filter(bet => bet.name !== playerToDelete);
+        delete playerBalances[playerToDelete];
+        lastRaceResults = null;
+        renderBettingGrid();
+        showMessage(`Player ${playerToDelete} has been removed.`);
+    }
+
+    function updateSummaryRowsOnly() {
+        const numHorses = parseInt(numHorsesInput.value, 10);
+        const totalBets = {};
+        let totalPool = 0;
+        for(let i = 1; i <= numHorses; i++) {
+            const horseTotal = allBets.filter(bet => bet.horse === i).reduce((sum, bet) => sum + bet.amount, 0);
+            totalBets[i] = horseTotal;
+            totalPool += horseTotal;
+        }
+        
+        // Update only the summary row cells without re-rendering everything
+        const allSummaryCells = Array.from(document.querySelectorAll('.grid-cell.summary-cell'));
+        
+        // First summary row (Total bet per horse) - starts after 3 columns (X, Player, Points)
+        for (let i = 1; i <= numHorses; i++) {
+            const cellIndex = 3 + (i - 1); // 3 empty cells, then horse columns
+            if (allSummaryCells[cellIndex]) {
+                allSummaryCells[cellIndex].textContent = totalBets[i] || 0;
+            }
+        }
+        
+        // Second summary row (Total bettings) - last cell
+        const totalPoolCell = allSummaryCells[allSummaryCells.length - 1];
+        if (totalPoolCell) {
+            totalPoolCell.textContent = totalPool;
+        }
+    }
+
+    function updateSummaryRows() {
+        const numHorses = parseInt(numHorsesInput.value, 10);
+        const totalBets = {};
+        let totalPool = 0;
+        for(let i = 1; i <= numHorses; i++) {
+            const horseTotal = allBets.filter(bet => bet.horse === i).reduce((sum, bet) => sum + bet.amount, 0);
+            totalBets[i] = horseTotal;
+            totalPool += horseTotal;
+        }
+        
+        // Simply re-render the entire grid to update totals
+        renderBettingGrid();
+    }
+
+    function adjustBetWithScroll(e) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        let currentValue = parseInt(input.value) || 0;
+        if (e.deltaY < 0) {
+            currentValue = Math.max(0, currentValue + 1);
+        } else {
+            currentValue = Math.max(0, currentValue - 1);
+        }
+        input.value = currentValue;
+        updateBettingState();
+    }
+
+    function updateBettingState() {
+        allBets = [];
+        const unitInputs = bettingGridContainer.querySelectorAll('.unit-input');
+        unitInputs.forEach(input => {
+            const player = input.dataset.player;
+            const horse = parseInt(input.dataset.horse, 10);
+            const amount = parseInt(input.value, 10) || 0;
+            
+            if (amount > 0) {
+                allBets.push({ name: player, horse: horse, amount: amount });
+            }
+        });
+        updateSummaryRowsOnly();
+    }
+
+    function placeAllBets() {
+        updateBettingState();
+        if (allBets.length > 0) {
+            showMessage("Bets have been placed! Click the [Start Race] button.", true);
+            playButton.disabled = false;
+            setupHorses();
+            openTab('play');
+        } else {
+            showMessage("Please place at least one bet before placing all bets.");
+        }
+    }
+    
+    function calculatePayouts(winnerLane) {
+        const winningBets = allBets.filter(bet => bet.horse === winnerLane);
+        const totalPool = allBets.reduce((sum, bet) => sum + bet.amount, 0);
+        const winningBetsTotal = winningBets.reduce((sum, bet) => sum + bet.amount, 0);
+        
+        if (winningBets.length === 0) {
+            return { totalPool: totalPool, winnerData: [], winnerLane: winnerLane };
+        }
+        
+        let detailedPayouts = winningBets.map(bet => {
+            const rawPayout = (bet.amount / winningBetsTotal) * totalPool;
+            return {
+                name: bet.name,
+                amount: bet.amount,
+                rawPayout: rawPayout,
+                roundedPayout: Math.floor(rawPayout),
+                fractionalPart: rawPayout - Math.floor(rawPayout)
+            };
+        });
+
+        const sumOfInitialRounded = detailedPayouts.reduce((sum, payout) => sum + payout.roundedPayout, 0);
+        const remainder = totalPool - sumOfInitialRounded;
+        
+        detailedPayouts.sort((a, b) => b.fractionalPart - a.fractionalPart);
+        
+        for (let i = 0; i < remainder; i++) {
+            if (detailedPayouts[i]) {
+                detailedPayouts[i].roundedPayout++;
+            }
+        }
+        
+        return { totalPool: totalPool, winnerData: detailedPayouts, winnerLane: winnerLane };
+    }
+
+    function updateSessionBalances(results) {
+        players.forEach(playerName => {
+            const playerTotalStake = allBets
+                .filter(bet => bet.name === playerName)
+                .reduce((sum, bet) => sum + bet.amount, 0);
+
+            const winningEntry = results.winnerData.find(w => w.name === playerName);
+            const playerPayout = winningEntry ? winningEntry.roundedPayout : 0;
+
+            const netResult = playerPayout - playerTotalStake;
+            playerBalances[playerName] = (playerBalances[playerName] || 0) + netResult;
+        });
+    }
+    
+    function updateBettingResultsDisplay() {
+        if (!lastRaceResults) return;
+        
+        const { totalPool, winnerLane } = lastRaceResults;
+
+        // UPDATED: Use name
+        bettingResultsDiv.innerHTML = `<h3>Race Results: ${activeHorseNames[winnerLane-1]} Wins!</h3>`;
+        if (totalPool) {
+            bettingResultsDiv.innerHTML += `<p>Total Pool: ${totalPool} units</p>`;
+        }
+    }
+
+    // --- SIMULATOR LOGIC ---
+
+    function simulateSingleRace() {
+        const numHorses = parseInt(numHorsesInput.value, 10);
+        const trackLength = 1000;
+        let horsePositions = new Array(numHorses).fill(0);
+        let isRaceFinished = false;
+
+        while (!isRaceFinished) {
+            for (let i = 0; i < numHorses; i++) {
+                if (Math.random() < MOVE_CHANCE) {
+                    const speedVariation = Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+                    horsePositions[i] += speedVariation;
+                    if (horsePositions[i] >= trackLength) {
+                        return i + 1;
+                    }
+                }
+            }
+        }
+    }
+
+    function runSimulations() {
+        const numSimulations = parseInt(numSimulationsInput.value, 10);
+        const numHorses = parseInt(numHorsesInput.value, 10);
+
+        if (isNaN(numSimulations) || numSimulations < 100 || numSimulations > 100000) {
+            showMessage("Please enter a number between 100 and 100,000 for simulations.");
+            return;
+        }
+
+        let winCounts = {};
+        for (let i = 1; i <= numHorses; i++) {
+            winCounts[i] = 0;
+        }
+        
+        histogramContainer.innerHTML = '';
+        runSimulationsButton.disabled = true;
+
+        setTimeout(() => {
+            for (let i = 0; i < numSimulations; i++) {
+                const winner = simulateSingleRace();
+                winCounts[winner]++;
+            }
+            displayHistogram(winCounts, numSimulations);
+            runSimulationsButton.disabled = false;
+        }, 100);
+    }
+
+    function displayHistogram(winCounts, totalSimulations) {
+        histogramContainer.innerHTML = '';
+        const numHorses = Object.keys(winCounts).length;
+        const maxWins = Math.max(...Object.values(winCounts));
+        
+        for (let i = 1; i <= numHorses; i++) {
+            const wins = winCounts[i] || 0;
+            const percentage = ((wins / totalSimulations) * 100).toFixed(2);
+            
+            const bar = document.createElement('div');
+            bar.classList.add('histogram-bar');
+            const barHeight = maxWins > 0 ? (wins / maxWins) * 100 : 0;
+            bar.style.height = `${barHeight}%`;
+            
+            const hue = (i - 1) * (360 / numHorses);
+            bar.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+
+            const label = document.createElement('span');
+            label.classList.add('histogram-label');
+            label.textContent = `${percentage}%`;
+            
+            const horseNumberLabel = document.createElement('span');
+            horseNumberLabel.classList.add('histogram-horse-number');
+            // UPDATED: Use name
+            horseNumberLabel.textContent = activeHorseNames[i-1];
+
+            bar.appendChild(label);
+            bar.appendChild(horseNumberLabel);
+            histogramContainer.appendChild(bar);
+        }
+    }
+
+    runSimulationsButton.addEventListener('click', runSimulations);
+    
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            openTab(tabName);
+        });
+    });
+
+    placeBetsButton.addEventListener('click', placeAllBets);
+
+    document.querySelector('.tab-button[data-tab="play"]').classList.add('active');
+    setupHorses();
+    renderBettingGrid();
+
+</script>
+
+</body>
+</html>
+
